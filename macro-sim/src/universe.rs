@@ -1,8 +1,12 @@
+use crate::agents::Agent;
 /// The `universe` module defines the core structures and logic for the macro-sim universe.
 
 /// Represents the Universe, containing all entities and simulation state.
 pub struct Universe {
-    pub time: u64, // repents months
+    time: u64, // repents months
+    agents: Vec<Agent>, // this will become a more complex network structure.
+    // for now it's just a vector of agents.
+    // this should contain all the agents (is there a hierarchy?)
 }
 
 impl Universe {
@@ -10,7 +14,7 @@ impl Universe {
     pub fn new() -> Self {
         Universe {
             time: 0,
-            // Initialize other fields here.
+            agents: vec![Agent::new(0, 10.0)],
         }
     }
 
@@ -30,6 +34,7 @@ mod tests {
     #[test]
     fn test_universe_step() {
         let mut universe = Universe::new();
+
         universe.advance();
         assert_eq!(universe.time, 1);
 
