@@ -2,11 +2,16 @@ use crate::agents::Agent;
 /// The `universe` module defines the core structures and logic for the macro-sim universe.
 
 /// Represents the Universe, containing all entities and simulation state.
+/// I probably should also create a class called "simulation time"
+/// and make sure my agents age and time counting conventions
+/// are aligned?
+
+
 pub struct Universe {
     time: u64, // repents months
     agents: Vec<Agent>, // this will become a more complex network structure.
-    // for now it's just a vector of agents.
-    // this should contain all the agents (is there a hierarchy?)
+               // for now it's just a vector of agents.
+               // this should contain all the agents (is there a hierarchy?)
 }
 
 impl Universe {
@@ -14,7 +19,7 @@ impl Universe {
     pub fn new() -> Self {
         Universe {
             time: 0,
-            agents: vec![Agent::new(0, 10.0)],
+            agents: vec![Agent::new(0, 10.0), Agent::new(1, 10.0)],
         }
     }
 
@@ -23,6 +28,8 @@ impl Universe {
         // Advance the simulation state here.
         // If advancing is successful, increment time; otherwise, handle the error or rollback.
         // For now, we assume success.
+        // agent map?
+        println!("{:?}", self.agents);
         self.time += 1;
     }
 }
@@ -32,7 +39,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_universe_step() {
+    fn test_advance() {
         let mut universe = Universe::new();
 
         universe.advance();
