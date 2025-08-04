@@ -1,4 +1,4 @@
 pub mod agents;
 pub mod universe;
-mod network;
+mod graph;
 // pub mod utilities;
