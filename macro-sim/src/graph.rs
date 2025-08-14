@@ -1,39 +1,37 @@
-use std::collections::HashMap;
+// use petgraph::graph::Graph;
+// use std::collections::HashMap;
 
-// this should be directed. use petgraph?
+// use crate::agents::Agent;
 
-#[derive(Debug)]
-pub struct Graph {
-    edges: HashMap<u64, Vec<u64>> // u32 4billion max (might not be enough)
-}
+// // this should be directed. use petgraph?
+// // point towards where it should go?
+// // do I need the "weighs" as well?
 
-impl Graph {
-    pub fn init_test() -> Self {
-        let mut adjacency_list = HashMap::new();
-        adjacency_list.insert(0, vec![1, 2]); // 0 -> 1, 2 (this should be directed, cyclic?)
-        adjacency_list.insert(1, vec![1, 2]);
-        adjacency_list.insert(2, vec![1, 2]);
-        
-        Self { edges: adjacency_list }
-    }
-}
+// // there might be different types of networks (social, local, economic) that we have to account for...
+// // each node will have ins and outs, so this is a directed graph structure.
+// // "equilibrate" my runs to get some interesting configurations
+// // agents live on a graph, but how tightly should this be coupled?
 
-// point towards where it should go?
-// do I need the "weighs" as well?
+// struct PaymentNetwork {
+//     graph: Graph<Agent, u64>,
+// }
 
-// there might be different types of networks (social, local, economic) that we have to account for...
-// each node will have ins and outs, so this is a directed graph structure.
-// "equilibrate" my runs to get some interesting configurations
+// impl PaymentNetwork {
+//     pub fn default() {
+//         let mut graph: Graph<Agent, u64> = Graph::new();
+//         // do one connection and visualize it
+//         // hierarchical graphs?
+//     }
+// }
 
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_construction() {
-        let adj = Graph::init_test();
-        println!("{:?}", adj);
-        assert_eq!(true, true);
-    }
-}
+//     #[test]
+//     fn test_construction() {
+//         let adj = 1;
+//         println!("{:?}", adj);
+//         assert_eq!(true, true);
+//     }
+// }
