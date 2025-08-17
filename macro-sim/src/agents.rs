@@ -1,26 +1,19 @@
 pub mod individual;
 use std::collections::{HashMap, HashSet};
 
-// define some power dynamics
-// define how we pay each other
-// define actions and forecasting to make decisions
-// payment "network"
-
 #[derive(Debug)]
 pub struct Agent {
     id: usize,
     wealth: f64,
-    age: f64,            // complex, keep as constant for now
-    owes_to: Vec<usize>, // store agent IDs + magnitude - cannot owe self
+    age: f64, // lets work in "months" (so not f64 - should be discrete)
 }
 
 impl Agent {
-    pub fn new(id: usize, wealth: f64, owes_to: Vec<usize>) -> Self {
+    pub fn new(id: usize, wealth: f64) -> Self {
         Agent {
             id,
             wealth,
             age: 100.0,
-            owes_to,
         }
     }
 
@@ -37,79 +30,127 @@ impl Agent {
     }
 }
 
-fn depth_first_search(agents: &HashMap<usize, Agent>, start_id: usize, visited: &mut HashSet<usize>) {
-    // a recursive implementation that I don't quite understand.
-    if !visited.insert(start_id) {
-        return;
-    }
-
-    let agent = &agents[&start_id];
-    for &neighbor_id in &agent.owes_to {
-        depth_first_search(agents, neighbor_id, visited);
-    }
+pub struct Universe {
+    agents: HashMap<usize, Agent>,
+    connections: HashMap<usize, Vec<usize>>,
+    time: usize,
 }
 
+impl Universe {
+    pub fn new(n_agents: usize, wealth_distribution: &str) -> Self {
+        println!("Using: {wealth_distribution}");
+
+        let mut agents: HashMap<usize, Agent> = HashMap::with_capacity(n_agents);
+        let mut connections: HashMap<usize, Vec<usize>> = HashMap::with_capacity(n_agents);
+
+        for i in 0..n_agents {
+            let agent = Agent::new(i, 100.0);
+            agents.insert(i, agent);
+            connections.insert(i, Vec::new()); // TODO: should sample from a distribution
+        }
+
+        Universe {
+            agents,
+            connections,
+            time: 0,
+        }
+    }
+
+    pub fn from_agents(
+        agents: HashMap<usize, Agent>,
+        connections: HashMap<usize, Vec<usize>>,
+    ) -> Result<Self, String> {
+        let keys_agents: HashSet<_> = agents.keys().collect();
+        let keys_connections: HashSet<_> = connections.keys().collect();
+
+        if keys_agents != keys_connections {
+            return Err("Agent and connection keys do not match".to_string());
+        }
+
+        Ok(Universe {
+            agents,
+            connections,
+            time: 0,
+        })
+    }
+
+    pub fn get_time(&self) -> usize {
+        self.time
+    }
+
+    pub fn increment_time(&mut self) {
+        self.make_payments();
+        self.time += 1;
+    }
+
+    pub fn make_payments(&mut self) {
+        for (key, value) in self.connections.iter() {
+            println!("{key}, {value:#?}");
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_agents_traversal() {
+    fn test_universe_time_step() {
+        let mut agents = HashMap::new();
+        agents.insert(0, Agent::new(0, 100.0));
+        agents.insert(1, Agent::new(1, 100.0));
+        agents.insert(2, Agent::new(2, 100.0));
+        agents.insert(3, Agent::new(3, 100.0));
+        agents.insert(4, Agent::new(4, 100.0));
+
         // test network
         /*
                a0
-              / \    ^ 
-            a1  a2   | owing goes up
+              / \    ^
+            a1  a2   | connections point up
            /  \
           a3->a4
 
         */
-        let a0 = Agent::new(0, 100.0, Vec::new());
-        let a1 = Agent::new(1, 100.0, vec![0]);
-        let a2 = Agent::new(2, 100.0, vec![0]);
-        let a3 = Agent::new(3, 100.0, vec![1, 4]);
-        let a4 = Agent::new(4, 100.0, vec![1]);
+        let mut connections = HashMap::new();
+        connections.insert(0, Vec::new());
+        connections.insert(1, vec![0]);
+        connections.insert(2, vec![0]);
+        connections.insert(3, vec![1, 4]);
+        connections.insert(4, vec![1]);
 
-        // then we need to traverse and update
-        let mut agent_hashmap: HashMap<usize, Agent> = HashMap::new();
-        agent_hashmap.insert(0, a0);
-        agent_hashmap.insert(1, a1);
-        agent_hashmap.insert(2, a2);
-        agent_hashmap.insert(3, a3);
-        agent_hashmap.insert(4, a4);
-        
-        let agent_hashmap = agent_hashmap; // make immutable
-        println!("{agent_hashmap:#?}");
+        let mut universe = Universe::from_agents(agents, connections).unwrap();
 
-        let mut visited_nodes: HashSet<usize> = HashSet::new();
+        assert_eq!(universe.get_time(), 0);
+        universe.increment_time();
+        assert_eq!(universe.get_time(), 1);
+        // let mut visited_nodes: HashSet<usize> = HashSet::new();
 
-        // mutable references have to be declared directly...
-        depth_first_search(&agent_hashmap, 0, &mut visited_nodes);
+        // // mutable references have to be declared directly...
+        // depth_first_search(&agent_hashmap, 0, &mut visited_nodes);
 
-        // unique keys that haven't occurred before -> static sampler?
-
-
-
+        // // unique keys that haven't occurred before -> static sampler?
+        // // eventually my graph must end. What kind of cycles am I doing here?
+        // // surely this might end up quite slow...
     }
 
     #[test]
     fn test_agent_new() {
-        let agent = Agent::new(1, 100.0, Vec::new());
+        let agent = Agent::new(1, 100.0);
         assert_eq!(agent.get_id(), 1);
         assert_eq!(agent.get_wealth(), 100.0);
     }
 
     #[test]
     fn test_agent_new_zero_wealth() {
-        let agent = Agent::new(2, 0.0, Vec::new());
+        let agent = Agent::new(2, 0.0);
         assert_eq!(agent.id, 2);
         assert_eq!(agent.wealth, 0.0);
     }
 
     #[test]
     fn test_agent_new_negative_wealth() {
-        let agent = Agent::new(3, -50.0, Vec::new());
+        let agent = Agent::new(3, -50.0);
         assert_eq!(agent.get_id(), 3);
         assert_eq!(agent.get_wealth(), -50.0);
         assert_eq!(agent.get_age(), 100.0);
