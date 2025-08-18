@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 #[derive(Debug)]
 pub struct Agent {
     id: usize,
-    wealth: f64,
+    pub wealth: f64,
     age: f64, // lets work in "months" (so not f64 - should be discrete)
 }
 
@@ -15,6 +15,10 @@ impl Agent {
             wealth,
             age: 100.0,
         }
+    }
+
+    pub fn dump(&self) -> String {
+        format!("id: {}, wealth: {:.2}, age: {:.2}", self.id, self.wealth, self.age)
     }
 
     pub fn get_id(&self) -> usize {
@@ -84,8 +88,35 @@ impl Universe {
     }
 
     pub fn make_payments(&mut self) {
-        for (key, value) in self.connections.iter() {
-            println!("{key}, {value:#?}");
+        for (sender_id, receiver_ids) in self.connections.iter() {
+            println!("{sender_id}, {receiver_ids:#?}");
+
+            let mut sender_change = 0.0;
+            for receiver_id in receiver_ids {
+                let wealth_change = 10.0;
+                
+                let receiver = self.agents.get_mut(receiver_id).unwrap();
+                receiver.wealth += wealth_change;
+                sender_change -= wealth_change;
+            }
+
+            let sender: &mut Agent = self.agents.get_mut(sender_id).unwrap();
+            sender.wealth += sender_change;
+
+        }
+    }
+
+    pub fn dump_state(&self) {
+        // TODO: remove (or store)
+        // - seems expensive to sort every time we dump
+        let mut ids: Vec<_> = self.agents.keys().collect();
+        ids.sort();
+
+        for id in ids {
+            let agent = self.agents.get(id).unwrap();
+            let agent_dump = agent.dump();
+            let agent_dump = format!("agent: {}, {}", id, agent_dump);
+            println!("{}", agent_dump);
         }
     }
 }
@@ -122,16 +153,11 @@ mod tests {
         let mut universe = Universe::from_agents(agents, connections).unwrap();
 
         assert_eq!(universe.get_time(), 0);
+        universe.dump_state();
         universe.increment_time();
         assert_eq!(universe.get_time(), 1);
-        // let mut visited_nodes: HashSet<usize> = HashSet::new();
+        universe.dump_state();
 
-        // // mutable references have to be declared directly...
-        // depth_first_search(&agent_hashmap, 0, &mut visited_nodes);
-
-        // // unique keys that haven't occurred before -> static sampler?
-        // // eventually my graph must end. What kind of cycles am I doing here?
-        // // surely this might end up quite slow...
     }
 
     #[test]
