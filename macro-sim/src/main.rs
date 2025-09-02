@@ -1,5 +1,4 @@
 use rand::Rng;
-use rand::distr;
 
 fn main() {
     let mut rng = rand::rng();
