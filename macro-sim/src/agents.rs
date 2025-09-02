@@ -5,15 +5,16 @@ use std::collections::{HashMap, HashSet};
 pub struct Agent {
     id: usize,
     pub wealth: f64,
-    age: f64, // lets work in "months" (so not f64 - should be discrete)
+    age: usize, // lets work in "months" (so not f64 - should be discrete)
 }
 
+// rename to Entity?
 impl Agent {
     pub fn new(id: usize, wealth: f64) -> Self {
         Agent {
             id,
             wealth,
-            age: 100.0,
+            age: 100,
         }
     }
 
@@ -29,10 +30,13 @@ impl Agent {
         self.wealth
     }
 
-    pub fn get_age(&self) -> f64 {
+    pub fn get_age(&self) -> usize {
         self.age
     }
 }
+
+
+// I might need an AgentCollection object to store multiple agents...
 
 pub struct Universe {
     agents: HashMap<usize, Agent>,
@@ -78,6 +82,12 @@ impl Universe {
         })
     }
 
+    // add a add_agents method, that can be used to insert custom agents into an initialized Universe
+
+    pub fn get_agent(&self, id: usize) -> Option<&Agent>{
+        self.agents.get(&id)
+    }
+    
     pub fn get_time(&self) -> usize {
         self.time
     }
@@ -153,10 +163,20 @@ mod tests {
         let mut universe = Universe::from_agents(agents, connections).unwrap();
 
         assert_eq!(universe.get_time(), 0);
-        universe.dump_state();
+        assert_eq!(universe.get_agent(0).unwrap().get_wealth(), 100.0);
+        assert_eq!(universe.get_agent(1).unwrap().get_wealth(), 100.0);
+        assert_eq!(universe.get_agent(2).unwrap().get_wealth(), 100.0);
+        assert_eq!(universe.get_agent(3).unwrap().get_wealth(), 100.0);
+        assert_eq!(universe.get_agent(4).unwrap().get_wealth(), 100.0);
+        
         universe.increment_time();
+
         assert_eq!(universe.get_time(), 1);
-        universe.dump_state();
+        assert_eq!(universe.get_agent(0).unwrap().get_wealth(), 120.0);
+        assert_eq!(universe.get_agent(1).unwrap().get_wealth(), 110.0);
+        assert_eq!(universe.get_agent(2).unwrap().get_wealth(), 90.0);
+        assert_eq!(universe.get_agent(3).unwrap().get_wealth(), 80.0);
+        assert_eq!(universe.get_agent(4).unwrap().get_wealth(), 100.0);
 
     }
 
@@ -179,6 +199,6 @@ mod tests {
         let agent = Agent::new(3, -50.0);
         assert_eq!(agent.get_id(), 3);
         assert_eq!(agent.get_wealth(), -50.0);
-        assert_eq!(agent.get_age(), 100.0);
+        assert_eq!(agent.get_age(), 100);
     }
 }
