@@ -19,7 +19,10 @@ impl Agent {
     }
 
     pub fn dump(&self) -> String {
-        format!("id: {}, wealth: {:.2}, age: {:.2}", self.id, self.wealth, self.age)
+        format!(
+            "id: {}, wealth: {:.2}, age: {:.2}",
+            self.id, self.wealth, self.age
+        )
     }
 
     pub fn get_id(&self) -> usize {
@@ -34,7 +37,6 @@ impl Agent {
         self.age
     }
 }
-
 
 // I might need an AgentCollection object to store multiple agents...
 
@@ -84,10 +86,10 @@ impl Universe {
 
     // add a add_agents method, that can be used to insert custom agents into an initialized Universe
 
-    pub fn get_agent(&self, id: usize) -> Option<&Agent>{
+    pub fn get_agent(&self, id: usize) -> Option<&Agent> {
         self.agents.get(&id)
     }
-    
+
     pub fn get_time(&self) -> usize {
         self.time
     }
@@ -104,7 +106,7 @@ impl Universe {
             let mut sender_change = 0.0;
             for receiver_id in receiver_ids {
                 let wealth_change = 10.0;
-                
+
                 let receiver = self.agents.get_mut(receiver_id).unwrap();
                 receiver.wealth += wealth_change;
                 sender_change -= wealth_change;
@@ -112,7 +114,6 @@ impl Universe {
 
             let sender: &mut Agent = self.agents.get_mut(sender_id).unwrap();
             sender.wealth += sender_change;
-
         }
     }
 
@@ -168,7 +169,7 @@ mod tests {
         assert_eq!(universe.get_agent(2).unwrap().get_wealth(), 100.0);
         assert_eq!(universe.get_agent(3).unwrap().get_wealth(), 100.0);
         assert_eq!(universe.get_agent(4).unwrap().get_wealth(), 100.0);
-        
+
         universe.increment_time();
 
         assert_eq!(universe.get_time(), 1);
@@ -177,7 +178,6 @@ mod tests {
         assert_eq!(universe.get_agent(2).unwrap().get_wealth(), 90.0);
         assert_eq!(universe.get_agent(3).unwrap().get_wealth(), 80.0);
         assert_eq!(universe.get_agent(4).unwrap().get_wealth(), 100.0);
-
     }
 
     #[test]
